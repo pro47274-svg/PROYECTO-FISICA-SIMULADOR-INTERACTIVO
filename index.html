@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Informe de Física — Simulaciones Interactivas</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
+  body{background:#f0f4f8;color:#1a202c;line-height:1.6;}
+  header{background:linear-gradient(135deg,#2b6cb0,#2c5282);color:white;padding:2rem;text-align:center;}
+  nav{background:#2d3748;position:sticky;top:0;z-index:100;display:flex;flex-wrap:wrap;justify-content:center;}
+  nav button{background:transparent;color:white;border:none;padding:1rem 1rem;cursor:pointer;font-size:0.9rem;}
+  nav button:hover, nav button.active{background:#2b6cb0;}
+  section{display:none;padding:2rem;max-width:1200px;margin:0 auto;}
+  section.active{display:block;animation:fade .3s;}
+  @keyframes fade{from{opacity:0;}to{opacity:1;}}
+  h2{color:#2b6cb0;margin-bottom:1rem;border-bottom:2px solid #e2e8f0;padding-bottom:.5rem;}
+  .form-group{margin:1rem 0;}
+  label{display:inline-block;width:220px;font-weight:600;}
+  input[type="range"]{width:250px;margin:0 .5rem;}
+  button{padding:.6rem 1.2rem;background:#2b6cb0;color:white;border:none;border-radius:6px;cursor:pointer;font-size:1rem;margin:.3rem;}
+  button:hover{background:#2c5282;}
+  button.secundario{background:#4a5568;}
+  canvas{background:white;border:2px solid #e2e8f0;border-radius:8px;display:block;margin:1rem auto;box-shadow:0 2px 8px rgba(0,0,0,.1);max-width:100%;}
+  .resultado{background:#edf2f7;padding:1rem;border-radius:8px;margin-top:1rem;font-size:1.1rem;}
+  .formula{font-family:monospace;background:#e2e8f0;padding:.3rem .6rem;border-radius:4px;display:inline-block;margin:.2rem 0;}
+  .grid-datos{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin:1rem 0;}
+  .dato{background:white;padding:1rem;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.08);}
+  .valor{font-weight:bold;color:#2b6cb0;font-size:1.2rem;}
+  .integrantes{background:white;padding:2rem;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.1);margin-top:2rem;}
+  .integrantes h3{color:#2b6cb0;margin-bottom:1rem;text-align:center;}
+  .integrante-item{padding:.8rem;border-bottom:1px solid #e2e8f0;}
+  .integrante-item:last-child{border:none;}
+  .etiqueta{font-weight:600;color:#4a5568;display:inline-block;width:120px;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🔬 Informe de Física — Simulaciones Interactivas</h1>
+  <p>Proyecto de evaluación — Experimenta cambiando valores en tiempo real</p>
+</header>
+
+<nav>
+  <button class="tab-btn active" data-tab="proyectil">Mov. Proyectiles</button>
+  <button class="tab-btn" data-tab="ohm">Ley de Ohm</button>
+  <button class="tab-btn" data-tab="caida">Caída Libre</button>
+  <button class="tab-btn" data-tab="equilibrio">Equilibrio Rígido</button>
+  <button class="tab-btn" data-tab="deformacion">Deformación Sólidos</button>
+  <button class="tab-btn" data-tab="equipo">Integrantes</button>
+</nav>
+
+<!-- ============= SECCIÓN 1: MOVIMIENTO DE PROYECTILES ============= -->
+<section id="proyectil" class="active">
+  <h2>🎯 Movimiento Parabólico de un Proyectil</h2>
+  <p>El proyectil describe una trayectoria curva bajo la acción de la gravedad. La velocidad se descompone en componentes horizontal y vertical.</p>
+  
+  <div class="form-group">
+    <label>Velocidad inicial (m/s):</label>
+    <input type="range" id="v0" min="5" max="50" value="25">
+    <span id="v0-val">25</span> m/s
+  </div>
+  <div class="form-group">
+    <label>Ángulo de lanzamiento (°):</label>
+    <input type="range" id="angulo" min="5" max="85" value="45">
+    <span id="angulo-val">45</span>°
+  </div>
+  <div class="form-group">
+    <label>Gravedad (m/s²):</label>
+    <input type="range" id="gravedad" min="1" max="20" value="9.8" step="0.1">
+    <span id="gravedad-val">9.8</span> m/s²
+  </div>
+
+  <button onclick="iniciarProyectil()">▶ Iniciar / Reiniciar</button>
+  <button class="secundario" onclick="pausarProyectil()">⏸ Pausa</button>
+
+  <canvas id="lienzo-proyectil" width="800" height="400"></canvas>
+
+  <div class="grid-datos">
+    <div class="dato">Alcance máximo:<br><span class="valor" id="alcance">—</span> m</div>
+    <div class="dato">Altura máxima:<br><span class="valor" id="altura-max">—</span> m</div>
+    <div class="dato">Tiempo de vuelo:<br><span class="valor" id="tiempo-vuelo">—</span> s</div>
+  </div>
+
+  <div class="resultado">
+    <strong>Fórmulas:</strong><br>
+    Alcance: <span class="formula">R = (v₀² · sen(2θ)) / g</span><br>
+    Altura máxima: <span class="formula">H = (v₀² · sen²θ) / (2g)</span><br>
+    Tiempo de vuelo: <span class="formula">t = (2 · v₀ · senθ) / g</span>
+  </div>
+</section>
+
+<!-- ============= SECCIÓN 2: LEY DE OHM ============= -->
+<section id="ohm">
+  <h2>⚡ Ley de Ohm</h2>
+  <p>Relación entre voltaje, corriente y resistencia en un circuito eléctrico: <span class="formula">V = I × R</span></p>
+
+  <div class="form-group">
+    <label>Voltaje V (voltios):</label>
+    <input type="range" id="voltaje" min="1" max="220" value="12">
+    <span id="voltaje-val">12</span> V
+  </div>
+  <div class="form-group">
+    <label>Resistencia R (ohmios Ω):</label>
+    <input type="range" id="resistencia" min="1" max="200" value="30">
+    <span id="resistencia-val">30</span> Ω
+  </div>
+
+  <canvas id="lienzo-ohm" width="600" height="250"></canvas>
+
+  <div class="grid-datos">
+    <div class="dato">Corriente I:<br><span class="valor" id="corriente">—</span> A</div>
+    <div class="dato">Potencia:<br><span class="valor" id="potencia">—</span> W</div>
+    <div class="dato">Energía (1h):<br><span class="valor" id="energia">—</span> Wh</div>
+  </div>
+
+  <div class="resultado">
+    <strong>Fórmulas:</strong><br>
+    Corriente: <span class="formula">I = V / R</span><br>
+    Potencia: <span class="formula">P = V × I = V² / R</span>
+  </div>
+</section>
+
+<!-- ============= SECCIÓN 3: CAÍDA LIBRE ============= -->
+<section id="caida">
+  <h2>📉 Caída Libre</h2>
+  <p>Movimiento de un cuerpo bajo la acción exclusiva de la gravedad, sin considerar la resistencia del aire.</p>
+
+  <div class="form-group">
+    <label>Altura inicial (m):</label>
+    <input type="range" id="altura-inicial" min="5" max="500" value="100">
+    <span id="altura-inicial-val">100</span> m
+  </div>
+  <div class="form-group">
+    <label>Gravedad (m/s²):</label>
+    <input type="range" id="gravedad-caida" min="1" max="20" value="9.8" step="0.1">
+    <span id="gravedad-caida-val">9.8</span> m/s²
+  </div>
+
+  <button onclick="iniciarCaida()">▶ Soltar objeto</button>
+  <button class="secundario" onclick="reiniciarCaida()">🔄 Reiniciar</button>
+
+  <canvas id="lienzo-caida" width="400" height="500"></canvas>
+
+  <div class="grid-datos">
+    <div class="dato">Tiempo de caída:<br><span class="valor" id="t-caida">—</span> s</div>
+    <div class="dato">Velocidad final:<br><span class="valor" id="v-final">—</span> m/s</div>
+    <div class="dato">Velocidad media:<br><span class="valor" id="v-media">—</span> m/s</div>
+  </div>
+
+  <div class="resultado">
+    <strong>Fórmulas:</strong><br>
+    Tiempo: <span class="formula">t = √(2h / g)</span><br>
+    Velocidad final: <span class="formula">v = √(2gh)</span><br>
+    Posición: <span class="formula">y(t) = h − ½·g·t²</span>
+  </div>
+</section>
+
+<!-- ============= SECCIÓN 4: EQUILIBRIO DE OBJETO RÍGIDO ============= -->
+<section id="equilibrio">
+  <h2>⚖️ Equilibrio de un Cuerpo Rígido</h2>
+  <p>Un cuerpo rígido está en equilibrio cuando la suma de fuerzas y la suma de momentos respecto a cualquier punto son cero: <span class="formula">ΣF = 0</span> y <span class="formula">ΣM = 0</span></p>
+
+  <div class="form-group">
+    <label>Peso objeto 1 (N):</label>
+    <input type="range" id="peso1" min="10" max="200" value="50">
+    <span id="peso1-val">50</span> N
+  </div>
+  <div class="form-group">
+    <label>Distancia 1 al centro (m):</label>
+    <input type="range" id="dist1" min="0.1" max="3" value="1.5" step="0.1">
+    <span id="dist1-val">1.5</span> m
+  </div>
+  <div class="form-group">
+    <label>Peso objeto 2 (N):</label>
+    <input type="range" id="peso2" min="10" max="200" value="50">
+    <span id="peso2-val">50</span> N
+  </div>
+  <div class="form-group">
+    <label>Distancia 2 al centro (m):</label>
+    <input type="range" id="dist2" min="0.1" max="3" value="1.5" step="0.1">
+    <span id="dist2-val">1.5</span> m
+  </div>
+
+  <canvas id="lienzo-equilibrio" width="700" height="300"></canvas>
+
+  <div class="grid-datos">
+    <div class="dato">Momento 1:<br><span class="valor" id="momento1">—</span> N·m</div>
+    <div class="dato">Momento 2:<br><span class="valor" id="momento2">—</span> N·m</div>
+    <div class="dato">Estado:<br><span class="valor" id="estado-equilibrio">—</span></div>
+  </div>
+
+  <div class="resultado">
+    <strong>Condiciones de equilibrio:</strong><br>
+    ΣF<sub>y</sub> = R − P₁ − P₂ = 0 → Reacción: <span class="formula">R = P₁ + P₂</span><br>
+    ΣM<sub>centro</sub> = 0 → <span class="formula">P₁·d₁ = P₂·d₂</span> (equilibrio rotacional)
+  </div>
+</section>
+
+<!-- ============= SECCIÓN 5: DEFORMACIÓN DEL CUERPO SÓLIDO ============= -->
+<section id="deformacion">
+  <h2>🔩 Deformación de un Cuerpo Sólido</h2>
+  <p>Al aplicar una fuerza, un sólido elástico se deforma según la ley de Hooke y el módulo de Young.</p>
+
+  <div class="form-group">
+    <label>Fuerza aplicada (N):</label>
+    <input type="range" id="fuerza" min="100" max="5000" value="1000">
+    <span id="fuerza-val">1000</span> N
+  </div>
+  <div class="form-group">
+    <label>Longitud inicial L₀ (m):</label>
+    <input type="range" id="long-inic" min="0.5" max="5" value="2" step="0.1">
+    <span id="long-inic-val">2</span> m
+  </div>
+  <div class="form-group">
+    <label>Sección transversal (cm²):</label>
+    <input type="range" id="seccion" min="1" max="50" value="10">
+    <span id="seccion-val">10</span> cm²
+  </div>
+  <div class="form-group">
+    <label>Material / Módulo de Young (Y):</label>
+    <select id="material" onchange="actualizarY()">
+      <option value="70e9">Aluminio (7.0 × 10¹⁰ Pa)</option>
+      <option value="110e9">Latón (1.1 × 10¹¹ Pa)</option>
+      <option value="200e9" selected>Acero (2.0 × 10¹¹ Pa)</option>
+      <option value="190e9">Hierro (1.9 × 10¹¹ Pa)</option>
+      <option value="1.5e9">Goma (1.5 × 10⁹ Pa)</option>
+    </select>
+  </div>
+
+  <canvas id="lienzo-deformacion" width="700" height="280"></canvas>
+
+  <div class="grid-datos">
+    <div class="dato">Esfuerzo σ = F/A:<br><span class="valor" id="esfuerzo">—</span> Pa</div>
+    <div class="dato">Deformación ε = ΔL/L₀:<br><span class="valor" id="deformacion-unitaria">—</span></div>
+    <div class="dato">Alargamiento ΔL:<br><span class="valor" id="alargamiento">—</span> mm</div>
+  </div>
+
+  <div class="resultado">
+    <strong>Fórmulas:</strong><br>
+    Esfuerzo: <span class="formula">σ = F / A</span> donde A = sección transversal<br>
+    Deformación unitaria: <span class="formula">ε = ΔL / L₀ = σ / Y</span> (Y = módulo de Young)<br>
+    Alargamiento total: <span class="formula">ΔL = (F · L₀) / (Y · A)</span>
+  </div>
+</section>
+
+<!-- ============= SECCIÓN 6: INTEGRANTES ============= -->
+<section id="equipo">
+  <h2>👥 Integrantes del Proyecto</h2>
+  
+  <div class="integrantes">
+    <h3>Equipo de Trabajo</h3>
+    
+    <!-- ⚠️ MODIFICA ESTA LISTA CON LOS DATOS REALES DE TU ENLACE -->
+    <div class="integrante-item">
+      <span class="etiqueta">Integrante 1:</span>
+      <strong> CHRISTIAN GONZALES DOMINGUEZ
+
+    </div>
+    <div class="integrante-item">
+      <span class="etiqueta">Integrante 2:</span>
+      <strong> CARLOS GARCIAS FRANCO
+    </div>
+    <div class="integrante-item">
+      <span class="etiqueta">Integrante 3:</span>
+      <strong> ROBERT VELEZ BAREN
+
+    </div>
+    <div class="integrante-item">
+      <span class="etiqueta">Integrante 4:</span>
+      <strong> JORGE ESTEBAN HIPO 
+
+    </div>
+    <div class="integrante-item">
+      <span class="etiqueta">Integrante 5:</span>
+      <strong> JEAN CARLOS BOWEN
+
+
+    </div>
+    <div class="integrante-item">
+      <span class="etiqueta">Asignatura:</span>
+      <strong>Física 2 </strong>
+    </div>
+    <div class="integrante-item">
+      <span class="etiqueta">Docente:</span>
+      <strong> Franklin Cesar Ramirez Baquerizo
+    </div>
+    <div class="integrante-item">
+      <span class="etiqueta">Institución:</span>
+      <strong>Universidad Estatal Península de Santa Elena</strong>
+    </div>
+  </div>
+
+</section>
+
+<script>
+// ---------- NAVEGACIÓN POR PESTAÑAS ----------
+const botones = document.querySelectorAll('.tab-btn');
+const secciones = document.querySelectorAll('section');
+botones.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    botones.forEach(b=>b.classList.remove('active'));
+    secciones.forEach(s=>s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+    if(btn.dataset.tab==='proyectil') dibujarFondoProyectil();
+    if(btn.dataset.tab==='ohm') calcularOhm();
+    if(btn.dataset.tab==='caida') dibujarCaidaEstacionaria();
+    if(btn.dataset.tab==='equilibrio') calcularEquilibrio();
+    if(btn.dataset.tab==='deformacion') calcularDeformacion();
+  });
+});
+
+// ============== SIMULACIÓN 1: PROYECTIL ==============
+let animProy, tProy=0, enProgreso=false;
+const cProy=document.getElementById('lienzo-proyectil');
+const ctxProy=cProy.getContext('2d');
+
+['v0','angulo','gravedad'].forEach(id=>{
+  const inp=document.getElementById(id);
+  inp.addEventListener('input',()=>{
+    document.getElementById(id+'-val').textContent=inp.value;
+    if(!enProgreso) dibujarFondoProyectil();
+  });
+});
+
+function datosProyectil(){
+  const v0=+document.getElementById('v0').value;
+  const a=+document.getElementById('angulo').value*Math.PI/180;
+  const g=+document.getElementById('gravedad').value;
+  const R=(v0*v0*Math.sin(2*a))/g;
+  const H=(v0*v0*Math.sin(a)*Math.sin(a))/(2*g);
+  const t=(2*v0*Math.sin(a))/g;
+  document.getElementById('alcance').textContent=R.toFixed(2);
+  document.getElementById('altura-max').textContent=H.toFixed(2);
+  document.getElementById('tiempo-vuelo').textContent=t.toFixed(2);
+  return {v0,a,g,R,H,t};
+}
+
+function dibujarFondoProyectil(){
+  const d=datosProyectil();
+  const escalaX=(cProy.width-60)/Math.max(d.R,10);
+  const escalaY=(cProy.height-60)/Math.max(d.H*1.2,10);
+  const esc=Math.min(escalaX,escalaY);
+
+  ctxProy.clearRect(0,0,cProy.width,cProy.height);
+  ctxProy.beginPath();
+  ctxProy.moveTo(30,30); ctxProy.lineTo(30,cProy.height-30); ctxProy.lineTo(cProy.width-10,cProy.height-30);
+  ctxProy.strokeStyle='#333'; ctxProy.lineWidth=2; ctxProy.stroke();
+  ctxProy.font='12px sans-serif'; ctxProy.fillStyle='#555';
+  ctxProy.fillText('0',15,cProy.height-25);
+
+  ctxProy.beginPath();
+  for(let x=0;x<=d.R;x+=0.2){
+    const y=x*Math.tan(d.a)-(d.g*x*x)/(2*d.v0*d.v0*Math.cos(d.a)*Math.cos(d.a));
+    const px=30+x*esc;
+    const py=cProy.height-30-y*esc;
+    if(x===0) ctxProy.moveTo(px,py);
+    else ctxProy.lineTo(px,py);
+  }
+  ctxProy.strokeStyle='#90cdf4'; ctxProy.lineWidth=2; ctxProy.setLineDash([5,5]); ctxProy.stroke(); ctxProy.setLineDash([]);
+}
+
+function iniciarProyectil(){
+  if(animProy) cancelAnimationFrame(animProy);
+  tProy=0; enProgreso=true;
+  const d=datosProyectil();
+  const escalaX=(cProy.width-60)/Math.max(d.R,10);
+  const escalaY=(cProy.height-60)/Math.max(d.H*1.2,10);
+  const esc=Math.min(escalaX,escalaY);
+  const vx=d.v0*Math.cos(d.a);
+  const vy0=d.v0*Math.sin(d.a);
+
+  function paso(){
+    ctxProy.clearRect(0,0,cProy.width,cProy.height);
+    dibujarFondoProyectil();
+
+    const x=vx*tProy;
+    const y=vy0*tProy-0.5*d.g*tProy*tProy;
+
+    if(y>=0 && x<=d.R+0.5){
+      ctxProy.beginPath();
+      ctxProy.arc(30+x*esc, cProy.height-30-y*esc, 8, 0, Math.PI*2);
+      ctxProy.fillStyle='#e53e3e'; ctxProy.fill();
+
+      tProy+=0.02;
+      animProy=requestAnimationFrame(paso);
+    }else{
+      enProgreso=false;
+    }
+  }
+  paso();
+}
+
+function pausarProyectil(){
+  if(animProy){ cancelAnimationFrame(animProy); animProy=null; enProgreso=false; }
+}
+
+// ============== SIMULACIÓN 2: LEY DE OHM ==============
+const cOhm=document.getElementById('lienzo-ohm');
+const ctxOhm=cOhm.getContext('2d');
+
+['voltaje','resistencia'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',function(){
+    document.getElementById(id+'-val').textContent=this.value;
+    calcularOhm();
+  });
+});
+
+function calcularOhm(){
+  const V=+document.getElementById('voltaje').value;
+  const R=+document.getElementById('resistencia').value;
+  const I=(V/R).toFixed(4);
+  const P=(V*I).toFixed(2);
+  const E=(P/1000).toFixed(4);
+  document.getElementById('corriente').textContent=I;
+  document.getElementById('potencia').textContent=P;
+  document.getElementById('energia').textContent=E;
+  dibujarCircuito(V,R,parseFloat(I));
+}
+
+function dibujarCircuito(V,R,I){
+  ctxOhm.clearRect(0,0,cOhm.width,cOhm.height);
+  const x0=60, y0=120, ancho=480, alto=100;
+
+  ctxOhm.beginPath();
+  ctxOhm.moveTo(x0,y0); ctxOhm.lineTo(x0+ancho,y0);
+  ctxOhm.lineTo(x0+ancho,y0+alto); ctxOhm.lineTo(x0,y0+alto); ctxOhm.closePath();
+  ctxOhm.strokeStyle='#333'; ctxOhm.lineWidth=4; ctxOhm.stroke();
+
+  ctxOhm.fillStyle='#f6e05e';
+  ctxOhm.fillRect(x0-10,y0+alto/2-25,20,50);
+  ctxOhm.font='bold 14px sans-serif'; ctxOhm.fillStyle='#2d3748';
+  ctxOhm.fillText(`${V} V`,x0-8,y0+alto/2+5);
+
+  ctxOhm.fillStyle='#90cdf4';
+  ctxOhm.fillRect(x0+ancho-60,y0+alto/2-20,60,40);
+  ctxOhm.fillText(`${R} Ω`,x0+ancho-50,y0+alto/2+5);
+
+  const brillo=Math.min(Math.sqrt(I*V)/15,1);
+  ctxOhm.beginPath();
+  ctxOhm.arc(x0+ancho/2,y0,25,0,Math.PI*2);
+  ctxOhm.fillStyle=`rgba(255,255,0,${brillo*0.8+0.2})`;
+  ctxOhm.fill();
+  ctxOhm.strokeStyle='#333'; ctxOhm.lineWidth=2; ctxOhm.stroke();
+
+  ctxOhm.beginPath();
+  ctxOhm.moveTo(x0+ancho/2,y0+alto+15);
+  ctxOhm.lineTo(x0+ancho/2+I*30+20,y0+alto+15);
+  ctxOhm.strokeStyle='#e53e3e'; ctxOhm.lineWidth=3; ctxOhm.stroke();
+  ctxOhm.fillStyle='#e53e3e';
+  ctxOhm.fillText(`I = ${I} A`,x0+ancho/2,y0+alto+40);
+}
+
+// ============== SIMULACIÓN 3: CAÍDA LIBRE ==============
+let animCaida, tCaida=0, enCaida=false;
+let hInic=100, gCaida=9.8;
+const cCaida=document.getElementById('lienzo-caida');
+const ctxCaida=cCaida.getContext('2d');
+
+['altura-inicial','gravedad-caida'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',function(){
+    document.getElementById(id+'-val').textContent=this.value;
+    if(!enCaida){
+      hInic=+document.getElementById('altura-inicial').value;
+      gCaida=+document.getElementById('gravedad-caida').value;
+      dibujarCaidaEstacionaria();
+    }
+  });
+});
+
+function dibujarCaidaEstacionaria(){
+  hInic=+document.getElementById('altura-inicial').value;
+  gCaida=+document.getElementById('gravedad-caida').value;
+  ctxCaida.clearRect(0,0,cCaida.width,cCaida.height);
+  const escala=(cCaida.height-80)/hInic;
+
+  ctxCaida.fillStyle='#68d391';
+  ctxCaida.fillRect(0,cCaida.height-40,cCaida.width,40);
+
+  ctxCaida.beginPath();
+  ctxCaida.moveTo(cCaida.width/2-80,40);
+  ctxCaida.lineTo(cCaida.width/2-80,cCaida.height-40);
+  ctxCaida.strokeStyle='#cbd5e0'; ctxCaida.setLineDash([4,4]); ctxCaida.stroke(); ctxCaida.setLineDash([]);
+  ctxCaida.fillStyle='#2d3748'; ctxCaida.font='13px sans-serif';
+  ctxCaida.fillText(`${hInic} m`,cCaida.width/2-70,cCaida.height/2);
+
+  ctxCaida.beginPath();
+  ctxCaida.arc(cCaida.width/2, 40, 18, 0, Math.PI*2);
+  ctxCaida.fillStyle='#e53e3e'; ctxCaida.fill();
+}
+
+function iniciarCaida(){
+  if(animCaida) cancelAnimationFrame(animCaida);
+  hInic=+document.getElementById('altura-inicial').value;
+  gCaida=+document.getElementById('gravedad-caida').value;
+  tCaida=0; enCaida=true;
+  const tTotal=Math.sqrt(2*hInic/gCaida);
+  const vFinal=Math.sqrt(2*gCaida*hInic);
+  document.getElementById('t-caida').textContent=tTotal.toFixed(3);
+  document.getElementById('v-final').textContent=vFinal.toFixed(2)+' m/s';
+  document.getElementById('v-media').textContent=(vFinal/2).toFixed(2)+' m/s';
+
+  const escala=(cCaida.height-80)/hInic;
+
+  function pasoCaida(){
+    ctxCaida.clearRect(0,0,cCaida.width,cCaida.height);
+    ctxCaida.fillStyle='#68d391';
+    ctxCaida.fillRect(0,cCaida.height-40,cCaida.width,40);
+    ctxCaida.beginPath();
+    ctxCaida.moveTo(cCaida.width/2-80,40);
+    ctxCaida.lineTo(cCaida.width/2-80,cCaida.height-40);
+    ctxCaida.strokeStyle='#cbd5e0'; ctxCaida.setLineDash([4,4]); ctxCaida.stroke(); ctxCaida.setLineDash([]);
+
+    const yCaida=hInic-0.5*gCaida*tCaida*tCaida;
+
+    if(yCaida>0){
+      const py=cCaida.height-40-yCaida*escala;
+      ctxCaida.beginPath();
+      ctxCaida.arc(cCaida.width/2, py, 18, 0, Math.PI*2);
+      ctxCaida.fillStyle='#e53e3e'; ctxCaida.fill();
+
+      ctxCaida.fillStyle='#2d3748'; ctxCaida.font='14px sans-serif';
+      ctxCaida.fillText(`t = ${tCaida.toFixed(2)} s`, 20, 30);
+      ctxCaida.fillText(`y = ${yCaida.toFixed(2)} m`, 20, 55);
+      ctxCaida.fillText(`v = ${(gCaida*tCaida).toFixed(2)} m/s`, 20, 80);
+
+      tCaida+=0.02;
+      animCaida=requestAnimationFrame(pasoCaida);
+    }else{
+      enCaida=false;
+      ctxCaida.beginPath();
+      ctxCaida.arc(cCaida.width/2, cCaida.height-58, 18, 0, Math.PI*2);
+      ctxCaida.fillStyle='#48bb78'; ctxCaida.fill();
+      ctxCaida.fillStyle='#2d3748'; ctxCaida.font='15px sans-serif';
+      ctxCaida.fillText('¡Impacto!', cCaida.width/2-40, cCaida.height-70);
+    }
+  }
+  pasoCaida();
+}
+
+function reiniciarCaida(){
+  if(animCaida){ cancelAnimationFrame(animCaida); animCaida=null; }
+  enCaida=false; tCaida=0;
+  document.getElementById('t-caida').textContent='—';
+  document.getElementById('v-final').textContent='—';
+  document.getElementById('v-media').textContent='—';
+  dibujarCaidaEstacionaria();
+}
+
+// ============== SIMULACIÓN 4: EQUILIBRIO RÍGIDO ==============
+const cEqui=document.getElementById('lienzo-equilibrio');
+const ctxEqui=cEqui.getContext('2d');
+
+['peso1','dist1','peso2','dist2'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',function(){
+    document.getElementById(id+'-val').textContent=this.value;
+    calcularEquilibrio();
+  });
+});
+
+function calcularEquilibrio(){
+  const P1=+document.getElementById('peso1').value;
+  const d1=+document.getElementById('dist1').value;
+  const P2=+document.getElementById('peso2').value;
+  const d2=+document.getElementById('dist2').value;
+
+  const M1=P1*d1;
+  const M2=P2*d2;
+  const R=P1+P2;
+
+  document.getElementById('momento1').textContent=M1.toFixed(1);
+  document.getElementById('momento2').textContent=M2.toFixed(1);
+
+  const estado=(Math.abs(M1-M2)/Math.max(M1,M2,1)<0.02)
+    ? '<span style="color:green">✓ EQUILIBRADO</span>'
+    : '<span style="color:red">✗ DESEQUILIBRADO</span>';
+  document.getElementById('estado-equilibrio').innerHTML=estado;
+
+  dibujarPalanca(P1,d1,P2,d2,M1,M2);
+}
+
+function dibujarPalanca(P1,d1,P2,d2,M1,M2){
+  ctxEqui.clearRect(0,0,cEqui.width,cEqui.height);
+  const centroX=350, baseY=200;
+  const escalaDist=100; // píxeles por metro
+  const escalaPeso=0.4; // píxeles por Newton
+
+  // Triángulo de apoyo
+  ctxEqui.fillStyle='#4a5568';
+  ctxEqui.beginPath();
+  ctxEqui.moveTo(centroX-25,baseY);
+  ctxEqui.lineTo(centroX+25,baseY);
+  ctxEqui.lineTo(centroX,baseY-40);
+  ctxEqui.closePath();
+  ctxEqui.fill();
+
+  // Ángulo de inclinación
+  const diffM=M1-M2;
+  const inclinacion=Math.max(-0.15,Math.min(0.15,diffM/500)); // radianes
+  const palancaY=baseY-40;
+
+  ctxEqui.save();
+  ctxEqui.translate(centroX,palancaY);
+  ctxEqui.rotate(inclinacion);
+
+  // Barra
+  ctxEqui.fillStyle='#2b6cb0';
+  ctxEqui.fillRect(-320,-6,640,12);
+
+  // Objeto izquierdo
+  const xIzq=-d1*escalaDist;
+  const tam1=Math.sqrt(P1)*escalaPeso*5;
+  ctxEqui.fillStyle='#e53e3e';
+  ctxEqui.beginPath();
+  ctxEqui.arc(xIzq,0,Math.max(tam1,15),0,Math.PI*2);
+  ctxEqui.fill();
+  ctxEqui.fillStyle='#fff';
+  ctxEqui.font='bold 11px sans-serif';
+  ctxEqui.textAlign='center';
+  ctxEqui.fillText(`${P1} N`,xIzq,4);
+
+  // Línea distancia 1
+  ctxEqui.beginPath();
+  ctxEqui.moveTo(xIzq,15);
+  ctxEqui.lineTo(xIzq,d1*escalaDist*0.3);
+  ctxEqui.lineTo(0,d1*escalaDist*0.3);
+  ctxEqui.lineTo(0,15);
+  ctxEqui.strokeStyle='#e53e3e'; ctxEqui.lineWidth=2; ctxEqui.stroke();
+  ctxEqui.fillStyle='#e53e3e';
+  ctxEqui.fillText(`${d1} m`,xIzq/2,d1*escalaDist*0.3+15);
+
+  // Objeto derecho
+  const xDer=d2*escalaDist;
+  const tam2=Math.sqrt(P2)*escalaPeso*5;
+  ctxEqui.fillStyle='#38a169';
+  ctxEqui.beginPath();
+  ctxEqui.arc(xDer,0,Math.max(tam2,15),0,Math.PI*2);
+  ctxEqui.fill();
+  ctxEqui.fillStyle='#fff';
+  ctxEqui.fillText(`${P2} N`,xDer,4);
+
+  // Línea distancia 2
+  ctxEqui.beginPath();
+  ctxEqui.moveTo(xDer,15);
+  ctxEqui.lineTo(xDer,d2*escalaDist*0.3);
+  ctxEqui.lineTo(0,d2*escalaDist*0.3);
+  ctxEqui.lineTo(0,15);
+  ctxEqui.strokeStyle='#38a169'; ctxEqui.lineWidth=2; ctxEqui.stroke();
+  ctxEqui.fillStyle='#38a169';
+  ctxEqui.fillText(`${d2} m`,xDer/2,d2*escalaDist*0.3+15);
+
+  ctxEqui.restore();
+
+  // Etiquetas de momentos
+  ctxEqui.font='bold 13px sans-serif';
+  ctxEqui.fillStyle='#e53e3e';
+  ctxEqui.fillText(`M₁ = ${M1.toFixed(1)} N·m`, 30, 40);
+  ctxEqui.fillStyle='#38a169';
+  ctxEqui.fillText(`M₂ = ${M2.toFixed(1)} N·m`, cEqui.width-200, 40);
+}
+
+// ============== SIMULACIÓN 5: DEFORMACIÓN ==============
+const cDef = document.getElementById('lienzo-deformacion');
+const ctxDef = cDef.getContext('2d');
+
+// Actualizar las etiquetas y recalcular cuando se mueva cualquier control.
+['fuerza','long-inic','seccion'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',function(){
+    document.getElementById(id+'-val').textContent=this.value;
+    calcularDeformacion();
+  });
+});
+document.getElementById('material').addEventListener('change',actualizarY);
+
+function actualizarY(){
+  calcularDeformacion();
+}
+
+function calcularDeformacion(){
+  const F = Number(document.getElementById('fuerza').value);       // N
+  const L0 = Number(document.getElementById('long-inic').value);  // m
+  const Acm2 = Number(document.getElementById('seccion').value); // cm²
+  const Y = Number(document.getElementById('material').value);   // Pa
+
+  // 1 cm² = 1 × 10⁻⁴ m². El módulo de Young se expresa en Pa = N/m².
+  const A = Acm2 * 1e-4;
+  const esfuerzo = F / A;                 // Pa
+  const deformacion = esfuerzo / Y;       // adimensional (régimen elástico)
+  const dL = deformacion * L0;            // m
+
+  document.getElementById('esfuerzo').textContent = esfuerzo.toExponential(3);
+  document.getElementById('deformacion-unitaria').textContent = deformacion.toExponential(3);
+  document.getElementById('alargamiento').textContent = (dL * 1000).toFixed(6);
+
+  dibujarBarra(F,L0,Acm2,dL);
+}
+
+function dibujarBarra(F,L0,Acm2,dL){
+  ctxDef.clearRect(0,0,cDef.width,cDef.height);
+  const margenIzq=80, margenDer=60;
+  const centroY=120;
+  const anchoMax=cDef.width-margenIzq-margenDer-95;
+  const escalaAncho=anchoMax/Math.max(L0,1);
+  const grosor=Math.max(25,Math.min(90,Acm2*2.5));
+
+  // La deformación real suele ser microscópica; se amplifica solo en el dibujo
+  // para que el cambio visual sea apreciable. Los resultados numéricos son reales.
+  const dLVisual = Math.min(L0 * 0.35, Math.max(0, dL * 50000));
+
+  // Pared de sujeción izquierda
+  ctxDef.fillStyle='#4a5568';
+  ctxDef.fillRect(20,centroY-70,35,140);
+
+  // Barra en posición original (línea punteada)
+  const anchoOriginal=L0*escalaAncho;
+  const anchoDeformado=anchoOriginal + dLVisual*escalaAncho;
+
+  ctxDef.beginPath();
+  ctxDef.setLineDash([6,4]);
+  ctxDef.strokeStyle='#a0aec0';
+  ctxDef.moveTo(margenIzq+anchoOriginal, centroY - grosor/2 - 5);
+  ctxDef.lineTo(margenIzq+anchoOriginal, centroY + grosor/2 + 5);
+  ctxDef.stroke();
+  ctxDef.setLineDash([]);
+
+  // Barra deformada
+  ctxDef.fillStyle='#90cdf4';
+  ctxDef.fillRect(margenIzq, centroY - grosor/2, anchoDeformado, grosor);
+  ctxDef.strokeStyle='#2b6cb0'; 
+  ctxDef.lineWidth=3;
+  ctxDef.strokeRect(margenIzq, centroY - grosor/2, anchoDeformado, grosor);
+
+  // Flecha de fuerza aplicada
+  ctxDef.beginPath();
+  ctxDef.moveTo(margenIzq + anchoDeformado, centroY);
+  ctxDef.lineTo(margenIzq + anchoDeformado + 45, centroY);
+  ctxDef.strokeStyle='#e53e3e'; 
+  ctxDef.lineWidth=4;
+  ctxDef.stroke();
+  ctxDef.beginPath();
+  ctxDef.moveTo(margenIzq + anchoDeformado + 45, centroY);
+  ctxDef.lineTo(margenIzq + anchoDeformado + 32, centroY - 10);
+  ctxDef.moveTo(margenIzq + anchoDeformado + 45, centroY);
+  ctxDef.lineTo(margenIzq + anchoDeformado + 32, centroY + 10);
+  ctxDef.stroke();
+
+  // Etiquetas
+  ctxDef.font='bold 13px sans-serif';
+  ctxDef.fillStyle='#2d3748';
+  ctxDef.fillText(`F = ${F} N`, margenIzq + anchoDeformado + 55, centroY + 5);
+  ctxDef.fillText(`L₀ = ${L0} m`, margenIzq + anchoOriginal/2 - 30, centroY - grosor/2 - 10);
+  ctxDef.fillStyle='#e53e3e';
+  ctxDef.fillText(`ΔL = ${(dL*1000).toFixed(4)} mm`, margenIzq + anchoDeformado/2 - 40, centroY + grosor/2 + 25);
+  ctxDef.fillStyle='#718096';
+  ctxDef.font='11px sans-serif';
+  ctxDef.fillText('······ Posición inicial | — Deformado', margenIzq + 10, centroY + grosor/2 + 50);
+}
+
+// Inicializar al cargar
+window.onload=()=>{
+  dibujarFondoProyectil();
+  calcularOhm();
+  dibujarCaidaEstacionaria();
+  calcularEquilibrio();
+  calcularDeformacion();
+};
+</script>
+</body>
+</html>
