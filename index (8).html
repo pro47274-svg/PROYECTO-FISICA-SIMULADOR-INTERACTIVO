@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Informe de Física 2 — Simulaciones interactivas</title>
+<style>
+:root{--ink:#1c2530;--mut:#5b6673;--bg:#f3f4f6;--rule:#d6dbe1;--ac:#1f4e79;--red:#b3342d;--grn:#2b7a4b}
+*{box-sizing:border-box;margin:0}
+body{font:16px/1.55 "Segoe UI",system-ui,sans-serif;color:var(--ink);background:var(--bg);display:grid;grid-template-columns:250px 1fr}
+aside{background:#17212b;color:#c9d2dc;padding:28px 0;position:sticky;top:0;height:100vh;overflow:auto}
+aside header{padding:0 22px 22px}
+aside h1{font:600 1.2rem/1.25 Georgia,serif;color:#fff}
+aside p{font-size:.8rem;color:#8e9bab;margin-top:8px}
+nav button{display:block;width:100%;text-align:left;background:none;border:0;border-left:3px solid transparent;color:inherit;padding:11px 22px 11px 19px;font:inherit;font-size:.93rem;cursor:pointer}
+nav button:hover{background:#1e2b38}
+nav button[aria-selected=true]{background:#1e2b38;border-color:#7fb0e0;color:#fff}
+:focus-visible{outline:2px solid #3b82c4;outline-offset:2px}
+main{padding:34px clamp(16px,4vw,52px) 60px;max-width:1100px;width:100%}
+section{display:none}section.on{display:block}
+h2{font:600 1.65rem/1.25 Georgia,serif}
+.lead{color:var(--mut);max-width:70ch;margin:6px 0 22px}
+.lab{display:grid;grid-template-columns:minmax(230px,290px) minmax(0,1fr);gap:22px;align-items:start}
+.panel{background:#fff;border:1px solid var(--rule);border-radius:6px;padding:18px}
+.ctl{margin-bottom:16px}
+.ctl label{display:flex;justify-content:space-between;gap:8px;font-size:.88rem;font-weight:600;margin-bottom:4px}
+output{font-variant-numeric:tabular-nums;color:var(--ac);font-weight:600;white-space:nowrap}
+input[type=range]{width:100%;accent-color:var(--ac)}
+select{width:100%;padding:8px;border:1px solid var(--rule);border-radius:4px;font:inherit;background:#fff}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.btns button{padding:8px 14px;border:1px solid var(--ac);background:var(--ac);color:#fff;border-radius:4px;font:inherit;font-size:.9rem;cursor:pointer}
+.btns button.alt{background:#fff;color:var(--ac)}
+.btns button:hover{filter:brightness(1.12)}
+.ctl .btns button{padding:5px 10px;font-size:.82rem}
+.sc{display:grid;gap:14px}
+canvas{width:100%;display:block;background:#fff;border:1px solid var(--rule);border-radius:6px}
+.pair{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:14px}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--rule);font-size:.92rem}
+th,td{padding:8px 12px;border-bottom:1px solid var(--rule);text-align:left}
+th{font-weight:500;color:var(--mut)}
+td:nth-child(2){font-weight:600;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td:nth-child(3){color:var(--mut);white-space:nowrap}
+.ok{color:var(--grn)}.bad{color:var(--red)}
+.eq{margin-top:24px;padding:2px 0 2px 18px;border-left:3px solid var(--ac);font-family:Georgia,serif;font-size:1.05rem}
+.eq h3{font:600 .95rem "Segoe UI",sans-serif;margin-bottom:6px}
+.eq p{margin:4px 0}
+.note{font-size:.85rem;color:var(--mut);margin-top:10px;max-width:75ch}
+dl{display:grid;grid-template-columns:max-content 1fr;gap:10px 28px;background:#fff;border:1px solid var(--rule);border-radius:6px;padding:22px;margin-top:6px}
+dt{color:var(--mut)}dd{font-weight:600}
+@media(max-width:900px){body{display:block}aside{position:static;height:auto;padding:16px 0 0}nav{display:flex;overflow-x:auto}nav button{width:auto;white-space:nowrap;border-left:0;border-bottom:3px solid transparent;padding:11px 16px}nav button[aria-selected=true]{border-color:#7fb0e0}.lab,.pair{grid-template-columns:1fr}}
+</style></head><body>
+<aside><header><h1>Física 2<br>Simulaciones interactivas</h1><p>Universidad Estatal Península de Santa Elena</p></header><nav id="nav"></nav></aside>
+<main>
+
+<section id="proy" data-t="Movimiento de proyectiles">
+<h2>Movimiento parabólico</h2>
+<p class="lead">Un proyectil lanzado con velocidad v₀ y ángulo θ avanza con velocidad horizontal constante, mientras su movimiento vertical es uniformemente acelerado por la gravedad.</p>
+<div class="lab"><div class="panel"><div id="c-proy"></div>
+<div class="btns"><button onclick="pP.play()">Lanzar</button><button class="alt" onclick="pP.toggle()">Pausar / reanudar</button><button class="alt" onclick="pP.reset()">Reiniciar</button></div></div>
+<div class="sc"><canvas id="cv-proy"></canvas><table id="t-proy"></table></div></div>
+<div class="eq"><h3>Modelo</h3>
+<p><i>x</i>(<i>t</i>) = <i>v</i><sub>0</sub> cos <i>θ</i> · <i>t</i>  ;  <i>y</i>(<i>t</i>) = <i>v</i><sub>0</sub> sen <i>θ</i> · <i>t</i> − ½ <i>g t</i>²</p>
+<p>Alcance: <i>R</i> = <i>v</i><sub>0</sub>² sen 2<i>θ</i> / <i>g</i></p>
+<p>Altura máxima: <i>H</i> = (<i>v</i><sub>0</sub> sen <i>θ</i>)² / 2<i>g</i></p>
+<p>Tiempo de vuelo: <i>T</i> = 2 <i>v</i><sub>0</sub> sen <i>θ</i> / <i>g</i></p></div>
+<p class="note">Se desprecia la resistencia del aire y el lanzamiento y el aterrizaje ocurren a la misma altura. La flecha verde es el vector velocidad; los ejes tienen la misma escala, por lo que la forma de la parábola es real. Si el tiempo de vuelo es largo, la animación se acelera (se indica en pantalla).</p>
+</section>
+
+<section id="ohm" data-t="Ley de Ohm">
+<h2>Ley de Ohm</h2>
+<p class="lead">En un resistor óhmico la corriente es proporcional al voltaje aplicado; la constante de proporcionalidad es la resistencia.</p>
+<div class="lab"><div class="panel"><div id="c-ohm"></div></div>
+<div class="sc"><canvas id="cv-ohm"></canvas><canvas id="cv-vi"></canvas><table id="t-ohm"></table></div></div>
+<div class="eq"><h3>Modelo</h3>
+<p><i>V</i> = <i>I</i> · <i>R</i>  →  <i>I</i> = <i>V</i> / <i>R</i></p>
+<p>Potencia: <i>P</i> = <i>V</i> · <i>I</i> = <i>V</i>² / <i>R</i> = <i>I</i>² · <i>R</i></p>
+<p>Energía: <i>E</i> = <i>P</i> · <i>t</i></p></div>
+<p class="note">Modelo ideal: R constante y fuente ideal. La potencia se disipa como calor en el resistor (efecto Joule). La corriente convencional sale del borne positivo (placa larga).</p>
+</section>
+
+<section id="caida" data-t="Caída libre">
+<h2>Caída libre</h2>
+<p class="lead">Movimiento de un cuerpo que parte del reposo y se mueve solo por la acción de la gravedad.</p>
+<div class="lab"><div class="panel"><div id="c-caida"></div>
+<div class="btns"><button onclick="pC.play()">Soltar</button><button class="alt" onclick="pC.toggle()">Pausar / reanudar</button><button class="alt" onclick="pC.reset()">Reiniciar</button></div></div>
+<div class="sc"><div class="pair"><canvas id="cv-caida"></canvas><canvas id="cv-yt"></canvas></div><table id="t-caida"></table></div></div>
+<div class="eq"><h3>Modelo</h3>
+<p><i>y</i>(<i>t</i>) = <i>h</i> − ½ <i>g t</i>²  ;  <i>v</i>(<i>t</i>) = <i>g t</i></p>
+<p>Tiempo de caída: <i>T</i> = √(2<i>h</i> / <i>g</i>)</p>
+<p>Velocidad final: <i>v</i><sub>f</sub> = √(2<i>g h</i>) = <i>g T</i></p>
+<p>Velocidad media: <i>v̄</i> = <i>h</i> / <i>T</i> = <i>v</i><sub>f</sub> / 2</p></div>
+<p class="note">Sin resistencia del aire. El gráfico de la derecha muestra la posición y la velocidad como fracción de sus valores máximos: la posición es parabólica y la velocidad, lineal.</p>
+</section>
+
+<section id="equi" data-t="Equilibrio rígido">
+<h2>Equilibrio de un cuerpo rígido</h2>
+<p class="lead">Una barra apoyada en su centro está en equilibrio cuando la suma de fuerzas y la suma de momentos respecto al apoyo son nulas.</p>
+<div class="lab"><div class="panel"><div id="c-equi"></div></div>
+<div class="sc"><canvas id="cv-equi"></canvas><table id="t-equi"></table></div></div>
+<div class="eq"><h3>Condiciones</h3>
+<p>Traslacional: Σ<i>F</i><sub>y</sub> = <i>R</i> − <i>P</i><sub>1</sub> − <i>P</i><sub>2</sub> = 0  →  <i>R</i> = <i>P</i><sub>1</sub> + <i>P</i><sub>2</sub></p>
+<p>Rotacional: Σ<i>M</i><sub>apoyo</sub> = 0  →  <i>P</i><sub>1</sub> <i>d</i><sub>1</sub> = <i>P</i><sub>2</sub> <i>d</i><sub>2</sub></p></div>
+<p class="note">Se desprecia el peso de la barra. La inclinación del dibujo es solo ilustrativa: el lado con mayor momento desciende. El equilibrio se evalúa con la condición exacta de momentos iguales.</p>
+</section>
+
+<section id="def" data-t="Deformación de sólidos">
+<h2>Deformación de un sólido</h2>
+<p class="lead">Dentro del régimen elástico, el alargamiento de una barra sometida a tracción es proporcional a la fuerza (ley de Hooke).</p>
+<div class="lab"><div class="panel"><div id="c-def"></div>
+<div class="ctl"><label for="mat">Material</label><select id="mat"></select></div></div>
+<div class="sc"><canvas id="cv-def"></canvas><table id="t-def"></table></div></div>
+<div class="eq"><h3>Modelo</h3>
+<p>Esfuerzo: <i>σ</i> = <i>F</i> / <i>A</i></p>
+<p>Deformación unitaria: <i>ε</i> = Δ<i>L</i> / <i>L</i><sub>0</sub> = <i>σ</i> / <i>Y</i></p>
+<p>Alargamiento: Δ<i>L</i> = <i>F L</i><sub>0</sub> / (<i>Y A</i>)</p></div>
+<p class="note">Los módulos de Young (Y) y los límites elásticos son valores de referencia aproximados. La elongación se dibuja ampliada porque en la realidad es microscópica.</p>
+</section>
+
+<section id="equipo" data-t="Integrantes">
+<h2>Integrantes del proyecto</h2>
+<p class="lead">Equipo de trabajo y datos académicos.</p>
+<dl>
+<dt>Integrante 1</dt><dd>CHRISTIAN GONZALES DOMINGUEZ</dd>
+<dt>Integrante 2</dt><dd>CARLOS GARCIAS FRANCO</dd>
+<dt>Integrante 3</dt><dd>ROBERT VELEZ BAREN</dd>
+<dt>Integrante 4</dt><dd>JORGE ESTEBAN HIPO</dd>
+<dt>Integrante 5</dt><dd>JEAN CARLOS BOWEN</dd>
+<dt>Asignatura</dt><dd>Física 2</dd>
+<dt>Docente</dt><dd>Franklin Cesar Ramirez Baquerizo</dd>
+<dt>Institución</dt><dd>Universidad Estatal Península de Santa Elena</dd>
+</dl>
+</section>
+</main>
+
+<script>
+const $=i=>document.getElementById(i),dpr=devicePixelRatio||1,PI=Math.PI;
+const f=(v,d=2)=>v.toLocaleString('es-EC',{minimumFractionDigits:d,maximumFractionDigits:d});
+const tbl=(id,r)=>$(id).innerHTML=r.map(([a,b,c])=>`<tr><th>${a}</th><td>${b}</td><td>${c||''}</td></tr>`).join('');
+const dec=s=>s>=1?0:Math.ceil(-Math.log10(s)-1e-9);
+const step=m=>{const p=10**Math.floor(Math.log10(m/5));return[1,2,5,10].map(k=>k*p).find(s=>m/s<=6)};
+function cv(id,w,h){const c=$(id);c.width=w*dpr;c.height=h*dpr;c.style.aspectRatio=w+'/'+h;const x=c.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);return{x,w,h}}
+const GR=[['Luna',1.6],['Marte',3.7],['Tierra',9.8],['Júpiter',24.8]];
+function ctl(id,rows,g){$('c-'+id).innerHTML=rows.map(([i,l,mn,mx,v,s,u])=>`<div class="ctl"><label for="${i}">${l}<output id="${i}-o"></output></label><input id="${i}" type="range" min="${mn}" max="${mx}" value="${v}" step="${s}" data-u="${u}"></div>`).join('')+(g?`<div class="ctl"><label>Gravedad de referencia</label><div class="btns">${GR.map(([n,v])=>`<button class="alt" data-t="${g}" data-v="${v}">${n}</button>`).join('')}</div></div>`:'')}
+function bind(ids,fn){ids.forEach(i=>{const e=$(i),u=()=>$(i+'-o').textContent=f(+e.value,dec(+e.step))+' '+e.dataset.u;u();e.addEventListener('input',()=>{u();fn()})})}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(b){const i=$(b.dataset.t);i.value=b.dataset.v;i.dispatchEvent(new Event('input'))}});
+const tx=(x,s,a,b,col='#1c2530',al='left',fo='12px "Segoe UI",sans-serif')=>{x.font=fo;x.fillStyle=col;x.textAlign=al;x.fillText(s,a,b)};
+function line(x,pts,col,w=2,dash=[]){x.beginPath();pts.forEach(([a,b],i)=>i?x.lineTo(a,b):x.moveTo(a,b));x.strokeStyle=col;x.lineWidth=w;x.setLineDash(dash);x.stroke();x.setLineDash([])}
+function dot(x,a,b,r,col){x.beginPath();x.arc(a,b,r,0,2*PI);x.fillStyle=col;x.fill()}
+function arrow(x,a,b,c,d,col){const t=Math.atan2(d-b,c-a);line(x,[[a,b],[c,d]],col,2.5);x.beginPath();x.moveTo(c,d);x.lineTo(c-9*Math.cos(t-.4),d-9*Math.sin(t-.4));x.lineTo(c-9*Math.cos(t+.4),d-9*Math.sin(t+.4));x.closePath();x.fillStyle=col;x.fill()}
+function plot(g,m,xm,ym,xl,yl){const{x,w,h}=g,pw=w-m.l-m.r,ph=h-m.t-m.b,X=v=>m.l+v/xm*pw,Y=v=>h-m.b-v/ym*ph,sx=step(xm),sy=step(ym);
+x.clearRect(0,0,w,h);
+for(let v=0;v<=xm*1.0001;v+=sx){line(x,[[X(v),Y(0)],[X(v),Y(ym)]],'#e4e8ed',1);tx(x,f(v,dec(sx)),X(v),h-m.b+15,'#5b6673','center','11px "Segoe UI",sans-serif')}
+for(let v=0;v<=ym*1.0001;v+=sy){line(x,[[X(0),Y(v)],[X(xm),Y(v)]],'#e4e8ed',1);tx(x,f(v,dec(sy)),m.l-6,Y(v)+4,'#5b6673','right','11px "Segoe UI",sans-serif')}
+line(x,[[m.l,m.t],[m.l,h-m.b],[w-m.r,h-m.b]],'#1c2530',1.5);
+tx(x,xl,w-m.r,h-5);tx(x,yl,m.l,13);return{X,Y}}
+function player(getT,draw){const s={t:0,run:false,raf:0,last:0};
+const tick=ts=>{const T=getT(),k=Math.max(1,T/7);s.t=Math.min(T,s.t+Math.max(0,ts-s.last)/1000*k);s.last=ts;if(s.t>=T)s.run=false;draw(s.t,k);if(s.run)s.raf=requestAnimationFrame(tick)};
+const go=()=>{s.run=true;s.last=performance.now();s.raf=requestAnimationFrame(tick)};
+s.play=()=>{cancelAnimationFrame(s.raf);s.t=0;go()};
+s.toggle=()=>{if(s.run){s.run=false;cancelAnimationFrame(s.raf)}else if(s.t>0&&s.t<getT())go()};
+s.reset=()=>{cancelAnimationFrame(s.raf);s.run=false;s.t=0;draw(0,1)};return s}
+
+/* ---------- 1. Proyectil ---------- */
+ctl('proy',[['v0','Velocidad inicial, v₀',5,50,25,1,'m/s'],['ang','Ángulo de lanzamiento, θ',5,85,45,1,'°'],['g1','Gravedad, g',1,25,9.8,.1,'m/s²']],'g1');
+const gP=cv('cv-proy',760,380);
+const dP=()=>{const v=+$('v0').value,a=+$('ang').value*PI/180,g=+$('g1').value;return{v,a,g,R:v*v*Math.sin(2*a)/g,H:(v*Math.sin(a))**2/(2*g),T:2*v*Math.sin(a)/g}};
+const tabP=()=>{const d=dP();tbl('t-proy',[['Alcance, R',f(d.R),'m'],['Altura máxima, H',f(d.H),'m'],['Tiempo de vuelo, T',f(d.T),'s'],['Componente horizontal, v<sub>0x</sub> = v₀ cos θ',f(d.v*Math.cos(d.a)),'m/s'],['Componente vertical, v<sub>0y</sub> = v₀ sen θ',f(d.v*Math.sin(d.a)),'m/s']])};
+const pP=player(()=>dP().T,(t,k)=>{const d=dP(),g=gP,x=g.x,m={l:52,t:24,r:20,b:34},pw=g.w-m.l-m.r,ph=g.h-m.t-m.b,
+s=Math.min(pw/(Math.max(d.R,1)*1.06),ph/(Math.max(d.H,1)*1.2)),p=plot(g,m,pw/s,ph/s,'x (m)','y (m)'),
+vx=d.v*Math.cos(d.a),vy0=d.v*Math.sin(d.a),pos=u=>[p.X(vx*u),p.Y(vy0*u-.5*d.g*u*u)],N=80;
+line(x,Array.from({length:N+1},(_,i)=>pos(d.T*i/N)),'#9db7d1',1.5,[5,4]);
+const ap=pos(d.T/2),lp=pos(d.T);dot(x,ap[0],ap[1],3,'#5b6673');tx(x,'H = '+f(d.H,1)+' m',ap[0]+8,ap[1]-6,'#5b6673');
+dot(x,lp[0],lp[1],3,'#5b6673');tx(x,'R = '+f(d.R,1)+' m',lp[0],lp[1]-10,'#5b6673','right');
+line(x,Array.from({length:Math.ceil(N*t/d.T)+1},(_,i)=>pos(Math.min(t,d.T*i/N))),'#1f4e79',2.5);
+const[b1,b2]=pos(t),vy=vy0-d.g*t;dot(x,b1,b2,7,'#b3342d');if(t>0)arrow(x,b1,b2,b1+vx*2.2,b2-vy*2.2,'#2b7a4b');
+tx(x,`t = ${f(t)} s   x = ${f(vx*t,1)} m   y = ${f(Math.max(0,vy0*t-.5*d.g*t*t),1)} m   v = ${f(Math.hypot(vx,vy),1)} m/s`+(k>1?`   (animación ×${f(k,1)})`:''),g.w-m.r,13,'#5b6673','right')});
+bind(['v0','ang','g1'],()=>{tabP();pP.reset()});
+
+/* ---------- 2. Ley de Ohm ---------- */
+ctl('ohm',[['V','Voltaje, V',1,220,12,1,'V'],['R','Resistencia, R',1,200,30,1,'Ω']]);
+const gO=cv('cv-ohm',520,200),gV=cv('cv-vi',520,250);
+function ohm(){const V=+$('V').value,R=+$('R').value,I=V/R,P=V*I,pd=P>=100?1:2,x=gO.x;
+tbl('t-ohm',[['Corriente, I = V / R',f(I,I>=100?1:I>=1?3:4),'A'],['Potencia disipada, P = V² / R',f(P,pd),'W'],['Energía en 1 h, E = P · t',f(P,pd),'Wh'],['Energía en 1 h',f(P/1000,4),'kWh'],['Conductancia, G = 1 / R',f(1/R,4),'S']]);
+const L=70,Rr=450,T=45,B=155,my=100;x.clearRect(0,0,520,200);
+line(x,[[L,my-8],[L,T],[Rr,T],[Rr,my-36]],'#1c2530',2.5);line(x,[[Rr,my+36],[Rr,B],[L,B],[L,my+8]],'#1c2530',2.5);
+line(x,[[L-16,my-8],[L+16,my-8]],'#1c2530',3.5);line(x,[[L-9,my+8],[L+9,my+8]],'#1c2530',3.5);
+tx(x,'+',L-32,my-3,'#1c2530','center','bold 15px sans-serif');tx(x,'−',L-32,my+14,'#1c2530','center','bold 15px sans-serif');
+tx(x,'V = '+f(V,0)+' V',L+24,my+4,'#1c2530','left','bold 13px "Segoe UI",sans-serif');
+x.fillStyle=`rgba(179,52,45,${Math.min(.06+P/120,.55)})`;x.fillRect(Rr-18,my-40,36,80);
+line(x,[[Rr,my-36],[Rr+10,my-27],[Rr-10,my-9],[Rr+10,my+9],[Rr-10,my+27],[Rr,my+36]],'#1c2530',2.5);
+tx(x,'R = '+f(R,0)+' Ω',Rr-26,my+4,'#1c2530','right','bold 13px "Segoe UI",sans-serif');
+arrow(x,230,T,290,T,'#b3342d');arrow(x,290,B,230,B,'#b3342d');
+tx(x,'I = '+f(I,I>=1?2:3)+' A',260,T-12,'#b3342d','center','bold 13px "Segoe UI",sans-serif');
+const pl=plot(gV,{l:56,t:24,r:20,b:36},220,220/R,'V (V)','I (A)'),y=gV.x;
+line(y,[[pl.X(0),pl.Y(0)],[pl.X(220),pl.Y(220/R)]],'#1f4e79',2.5);
+line(y,[[pl.X(V),pl.Y(0)],[pl.X(V),pl.Y(I)],[pl.X(0),pl.Y(I)]],'#b3342d',1.2,[4,3]);dot(y,pl.X(V),pl.Y(I),5,'#b3342d');
+tx(y,'Pendiente = 1/R = '+f(1/R,3)+' A/V',gV.w-20,14,'#5b6673','right')}
+bind(['V','R'],ohm);ohm();
+
+/* ---------- 3. Caída libre ---------- */
+ctl('caida',[['h','Altura inicial, h',5,500,100,1,'m'],['g2','Gravedad, g',1,25,9.8,.1,'m/s²']],'g2');
+const gC=cv('cv-caida',340,440),gY=cv('cv-yt',440,440);
+const dC=()=>{const h=+$('h').value,g=+$('g2').value;return{h,g,T:Math.sqrt(2*h/g),vf:Math.sqrt(2*g*h)}};
+const tabC=()=>{const d=dC();tbl('t-caida',[['Tiempo de caída, T = √(2h / g)',f(d.T,3),'s'],['Velocidad final, v<sub>f</sub> = √(2gh)',f(d.vf),'m/s'],['Velocidad final',f(d.vf*3.6,1),'km/h'],['Velocidad media, v̄ = h / T',f(d.vf/2),'m/s']])};
+const pC=player(()=>dC().T,(t,k)=>{const d=dC(),x=gC.x,top=50,gnd=400,r=12,s=(gnd-top-2*r)/d.h,y=Math.max(0,d.h-.5*d.g*t*t),v=d.g*t,st=step(d.h);
+x.clearRect(0,0,340,440);
+for(let m=0;m<=d.h*1.0001;m+=st){line(x,[[62,gnd-m*s],[330,gnd-m*s]],'#e4e8ed',1);tx(x,f(m,dec(st)),54,gnd-m*s+4,'#5b6673','right','11px "Segoe UI",sans-serif')}
+x.fillStyle='#d9dee4';x.fillRect(62,gnd,268,22);line(x,[[62,gnd],[330,gnd]],'#1c2530',2);
+dot(x,200,gnd-y*s-r,r,'#b3342d');
+tx(x,`t = ${f(t)} s   v = ${f(v)} m/s`,62,18);tx(x,`y = ${f(y)} m`+(k>1?`   (animación ×${f(k,1)})`:''),62,34,'#5b6673');
+if(t>=d.T)tx(x,'Impacto',250,gnd-30,'#1c2530','left','bold 13px "Segoe UI",sans-serif');
+const g=gY,m={l:46,t:34,r:16,b:36},p=plot(g,m,d.T,1,'t (s)',''),u=g.x,N=60;
+line(u,Array.from({length:N+1},(_,i)=>{const q=i/N;return[p.X(q*d.T),p.Y(1-q*q)]}),'#1f4e79',2.5);
+line(u,Array.from({length:N+1},(_,i)=>{const q=i/N;return[p.X(q*d.T),p.Y(q)]}),'#b3342d',2.5);
+tx(u,'y / h  (posición)',m.l,16,'#1f4e79','left','bold 12px "Segoe UI",sans-serif');tx(u,'v / v_f  (velocidad)',m.l+130,16,'#b3342d','left','bold 12px "Segoe UI",sans-serif');
+const q=t/d.T;dot(u,p.X(t),p.Y(1-q*q),5,'#1f4e79');dot(u,p.X(t),p.Y(q),5,'#b3342d')});
+bind(['h','g2'],()=>{tabC();pC.reset()});
+
+/* ---------- 4. Equilibrio ---------- */
+ctl('equi',[['P1','Peso del cuerpo 1, P₁',10,200,50,1,'N'],['d1','Distancia al apoyo, d₁',.1,3,1.5,.1,'m'],['P2','Peso del cuerpo 2, P₂',10,200,50,1,'N'],['d2','Distancia al apoyo, d₂',.1,3,1.5,.1,'m']]);
+const gE=cv('cv-equi',760,320);
+function equi(){const P1=+$('P1').value,d1=+$('d1').value,P2=+$('P2').value,d2=+$('d2').value,M1=P1*d1,M2=P2*d2,dM=M1-M2,ok=Math.abs(dM)<.05;
+tbl('t-equi',[['Momento del cuerpo 1, M₁ = P₁ · d₁',f(M1,1),'N·m'],['Momento del cuerpo 2, M₂ = P₂ · d₂',f(M2,1),'N·m'],['Momento neto, M₁ − M₂',f(dM,1),'N·m'],['Reacción del apoyo, R = P₁ + P₂',f(P1+P2,0),'N'],['Estado',`<span class="${ok?'ok':'bad'}">${ok?'En equilibrio':dM>0?'Gira hacia el cuerpo 1':'Gira hacia el cuerpo 2'}</span>`,'']]);
+const x=gE.x,cx=380,by=236,pv=by-46,th=-Math.max(-.2,Math.min(.2,.4*dM/(M1+M2)));
+x.clearRect(0,0,760,320);line(x,[[60,by],[700,by]],'#c9d0d8',2);
+x.beginPath();x.moveTo(cx-30,by);x.lineTo(cx+30,by);x.lineTo(cx,pv);x.closePath();x.fillStyle='#6b7684';x.fill();
+x.save();x.translate(cx,pv);x.rotate(th);x.fillStyle='#3a4756';x.fillRect(-330,-5,660,10);
+for(let k=-3;k<=3;k+=.5){line(x,[[k*100,5],[k*100,k%1?9:12]],'#3a4756',1);if(!(k%1)&&k)tx(x,Math.abs(k)+' m',k*100,26,'#5b6673','center','10px "Segoe UI",sans-serif')}
+[[P1,d1,-1,'#b3342d'],[P2,d2,1,'#1f4e79']].forEach(([P,d,sg,col])=>{const bx=sg*d*100,s=14+Math.sqrt(P)*1.6;
+x.fillStyle=col;x.fillRect(bx-s/2,-5-s,s,s);tx(x,P+' N',bx,-12-s,'#1c2530','center','bold 12px "Segoe UI",sans-serif');
+line(x,[[0,42],[bx,42]],col,1.5);line(x,[[bx,36],[bx,48]],col,1.5);line(x,[[0,36],[0,48]],col,1.5);tx(x,'d = '+f(d,1)+' m',bx/2,60,col,'center','bold 12px "Segoe UI",sans-serif')});
+x.restore();arrow(x,cx,by+60,cx,by+8,'#2b7a4b');tx(x,'R = '+f(P1+P2,0)+' N',cx+12,by+42,'#2b7a4b','left','bold 12px "Segoe UI",sans-serif')}
+bind(['P1','d1','P2','d2'],equi);equi();
+
+/* ---------- 5. Deformación ---------- */
+const MAT=[['Aluminio',70e9,100e6],['Latón',110e9,200e6],['Acero',200e9,250e6],['Hierro',190e9,180e6],['Caucho',.05e9,5e6]];
+$('mat').innerHTML=MAT.map((m,i)=>`<option value="${i}"${i==2?' selected':''}>${m[0]} (Y = ${f(m[1]/1e9,m[1]<1e9?2:0)} GPa)</option>`).join('');
+ctl('def',[['F','Fuerza de tracción, F',100,5000,1000,100,'N'],['L0','Longitud inicial, L₀',.5,5,2,.1,'m'],['A','Sección transversal, A',1,50,10,1,'cm²']]);
+$('c-def').insertAdjacentHTML('beforeend','');
+const gD=cv('cv-def',760,230);
+function defo(){const F=+$('F').value,L=+$('L0').value,Acm=+$('A').value,[,Y,lim]=MAT[+$('mat').value],sg=F/(Acm*1e-4),e=sg/Y,dL=e*L*1e3,ok=sg<=lim,[mn,ex]=e.toExponential(2).split('e');
+tbl('t-def',[['Esfuerzo, σ = F / A',f(sg/1e6),'MPa'],['Deformación unitaria, ε = σ / Y',`${mn.replace('.',',')} × 10<sup>${ex.replace('-','−').replace('+','')}</sup>`,''],['Alargamiento, ΔL = F·L₀ / (Y·A)',f(dL,dL<.1?4:dL<10?3:1),'mm'],['Régimen',`<span class="${ok?'ok':'bad'}">${ok?'Elástico':'Fuera del límite elástico'}</span>`,`σ<sub>lím</sub> ≈ ${f(lim/1e6,0)} MPa`]]);
+const x=gD.x,x0=80,cy=100,Lp=L/5*430,th=16+Math.sqrt(Acm)*5.5,amp=2e4,vis=Math.min(e*amp,.3)*Lp,xe=x0+Lp+vis;
+x.clearRect(0,0,760,230);x.fillStyle='#6b7684';x.fillRect(48,cy-70,32,140);
+x.setLineDash([6,4]);x.strokeStyle='#9aa5b1';x.lineWidth=1.5;x.strokeRect(x0,cy-th/2,Lp,th);x.setLineDash([]);
+x.fillStyle='#bcd3ea';x.fillRect(x0,cy-th/2,Lp+vis,th);x.strokeStyle='#1f4e79';x.lineWidth=2;x.strokeRect(x0,cy-th/2,Lp+vis,th);
+arrow(x,xe,cy,xe+60,cy,'#b3342d');tx(x,'F = '+f(F,0)+' N',xe+30,cy-14,'#b3342d','center','bold 12px "Segoe UI",sans-serif');
+const ly=cy+th/2+26;line(x,[[x0,ly],[x0+Lp,ly]],'#1c2530',1.5);line(x,[[x0,ly-6],[x0,ly+6]],'#1c2530',1.5);line(x,[[x0+Lp,ly-6],[x0+Lp,ly+6]],'#1c2530',1.5);
+tx(x,'L₀ = '+f(L,1)+' m',x0+Lp/2,ly+20,'#1c2530','center','bold 12px "Segoe UI",sans-serif');
+tx(x,'Elongación dibujada ×20 000'+(e*amp>.3?' (saturada en el dibujo)':'')+'. Línea punteada: longitud inicial.',20,218,'#5b6673','left','11px "Segoe UI",sans-serif')}
+bind(['F','L0','A'],defo);$('mat').onchange=defo;defo();
+
+/* ---------- Navegación ---------- */
+const secs=[...document.querySelectorAll('section')];
+secs.forEach(s=>{const b=document.createElement('button');b.textContent=s.dataset.t;b.dataset.id=s.id;b.onclick=()=>show(s.id);$('nav').append(b)});
+function show(id){secs.forEach(s=>s.classList.toggle('on',s.id===id));[...$('nav').children].forEach(b=>b.setAttribute('aria-selected',b.dataset.id===id));pP.reset();pC.reset();try{history.replaceState(null,'','#'+id)}catch(e){}}
+tabP();tabC();
+const h0=location.hash.slice(1);show(secs.some(s=>s.id===h0)?h0:'proy');
+</script>
+</body></html>
